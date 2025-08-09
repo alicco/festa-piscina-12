@@ -245,7 +245,8 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
-        const ordersCollection = collection(db, `poolPartyOrders-${firebaseConfig.projectId}`);
+        // MODIFICA: Utilizzo un nome di collezione statico per semplificare le regole di sicurezza
+        const ordersCollection = collection(db, "poolPartyOrders");
 
         const menu = {
             "Menù Cena": [
@@ -645,3 +646,4 @@
     </script>
 </body>
 </html>
+"
