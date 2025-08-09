@@ -103,7 +103,7 @@
             </div>
             <p id="form-error" class="text-red-400 text-sm mt-2 hidden"></p>
             <button id="continue-btn" class="mt-6 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 disabled:bg-gray-500 disabled:cursor-not-allowed" disabled>
-                Autenticazione in corso...
+                Connessione al servizio...
             </button>
         </section>
 
@@ -225,20 +225,27 @@
         // Importa le funzioni di Firebase necessarie
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         
         const { jsPDF } = window.jspdf;
 
-        // --- CONFIGURAZIONE E STATO DELL'APPLICAZIONE ---
-        const firebaseConfig = typeof __firebase_config !== 'undefined' 
-            ? JSON.parse(__firebase_config) 
-            : { apiKey: "YOUR_API_KEY", authDomain: "YOUR_AUTH_DOMAIN", projectId: "YOUR_PROJECT_ID" };
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'pool-party-app';
+        // --- CONFIGURAZIONE FIREBASE ---
+        // Queste chiavi collegano l'app al tuo database Firebase.
+        const firebaseConfig = {
+            apiKey: "AIzaSyDopx7tCr7Xppts6ZZ7lRmGpbXVsxcjmkc",
+            authDomain: "festa-piscina.firebaseapp.com",
+            projectId: "festa-piscina",
+            storageBucket: "festa-piscina.appspot.com",
+            messagingSenderId: "750140404658",
+            appId: "1:750140404658:web:37d5ee3550f5f571d7eaab"
+        };
+        // -------------------------------------------------------------
+
+        // --- Inizializzazione App (non modificare) ---
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
-        const ordersCollectionPath = `artifacts/${appId}/public/data/poolPartyOrders`;
-        const ordersCollection = collection(db, ordersCollectionPath);
+        const ordersCollection = collection(db, `poolPartyOrders-${firebaseConfig.projectId}`);
 
         const menu = {
             "Menù Cena": [
@@ -616,11 +623,8 @@
         const continueBtn = document.getElementById('continue-btn');
         async function handleAuthentication() {
             try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
+                // L'autenticazione anonima è sufficiente per le regole di sicurezza pubbliche
+                await signInAnonymously(auth);
             } catch (error) {
                 console.error("Authentication failed:", error);
                 continueBtn.textContent = 'Errore di autenticazione';
@@ -635,6 +639,7 @@
                 continueBtn.textContent = 'Continua e Ordina';
             }
         });
+        
         handleAuthentication();
 
     </script>
