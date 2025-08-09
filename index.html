@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prenotazione Festa in Piscina</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Stile per la scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1f2937;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4f46e5;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6366f1;
+        }
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+        .item-in-cart {
+            background-color: #16a34a !important; /* Verde per indicare l'aggiunta */
+            color: #ffffff !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white antialiased">
+
+    <div id="app" class="container mx-auto p-4 md:p-8 max-w-4xl">
+
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-indigo-400">Festa in Piscina</h1>
+            <p class="text-gray-400 mt-2">Benvenuti! Qui potete prenotare e ordinare per la cena.</p>
+        </header>
+
+        <!-- Sezione Info e Regolamento -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <section class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                <h2 class="text-2xl font-semibold mb-4 border-b border-gray-700 pb-2 text-indigo-300">Info Festa</h2>
+                <ul class="space-y-3 text-gray-300">
+                    <li><strong>📅 Data:</strong> Martedì 12 Agosto 2025</li>
+                    <li><strong>🕒 Orario:</strong> 20:00 - 23:00</li>
+                    <li><strong>📍 Luogo:</strong> Piscina Condominiale Holiday</li>
+                    <li><strong>🏠 Indirizzo:</strong> Montalto di Castro (VT)</li>
+                    <li><strong>👥 Max posti:</strong> 40 persone (tavoli condominiali)</li>
+                    <li><strong>🏊‍♀️ Include:</strong> Accesso piscina, musica</li>
+                    <li><strong>🍽️ Cena:</strong> Pizza d'asporto dalle 20:30</li>
+                </ul>
+            </section>
+            <section class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                <h2 class="text-2xl font-semibold mb-4 border-b border-gray-700 pb-2 text-indigo-300">Regolamento Importante</h2>
+                <ul class="space-y-3 text-gray-300">
+                    <li><strong>🗓️ Scadenze:</strong> Prenotazioni online entro il 10 agosto</li>
+                    <li><strong>💰 Pagamento:</strong> Quote da portare alla bagnina entro il 10 agosto</li>
+                    <li><strong>📄 Ingresso:</strong> Porta il riepilogo scaricabile alla festa</li>
+                    <li><strong>🍕 Ordini:</strong> Non si accettano modifiche dopo la conferma</li>
+                    <li><strong>🥤 Bevande:</strong> Le bevande vanno portate da soli</li>
+                    <li><strong>🍽️ Stoviglie:</strong> Stoviglie e bicchieri vanno portati da soli</li>
+                    <li><strong>🎫 Accesso:</strong> Solo con prenotazione confermata</li>
+                </ul>
+            </section>
+        </div>
+
+
+        <!-- Sezione 1: Dati Anagrafici -->
+        <section id="form-section" class="bg-gray-800 p-6 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-semibold mb-4 border-b border-gray-700 pb-2">Inizia la tua Prenotazione</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label for="firstName" class="block text-sm font-medium text-gray-300 mb-1">Nome</label>
+                    <input type="text" id="firstName" class="w-full bg-gray-700 border border-gray-600 rounded-md p-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="Es. Mario">
+                </div>
+                <div>
+                    <label for="lastName" class="block text-sm font-medium text-gray-300 mb-1">Cognome</label>
+                    <input type="text" id="lastName" class="w-full bg-gray-700 border border-gray-600 rounded-md p-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="Es. Rossi">
+                </div>
+                <div>
+                    <label for="peopleCount" class="block text-sm font-medium text-gray-300 mb-1">Numero di persone (incluso te)</label>
+                    <input type="number" id="peopleCount" min="1" class="w-full bg-gray-700 border border-gray-600 rounded-md p-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="Es. 2">
+                </div>
+            </div>
+            <p id="form-error" class="text-red-400 text-sm mt-2 hidden"></p>
+            <button id="continue-btn" class="mt-6 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 disabled:bg-gray-500 disabled:cursor-not-allowed" disabled>
+                Autenticazione in corso...
+            </button>
+        </section>
+
+        <!-- Sezione 2: Menù -->
+        <section id="menu-section" class="hidden mt-8">
+            <div id="menu-container" class="space-y-8"></div>
+            <button id="confirm-order-btn" class="mt-8 w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300">
+                Vedi Riepilogo Ordine
+            </button>
+        </section>
+
+        <!-- Sezione 3: Conferma Finale -->
+        <section id="confirmation-section" class="hidden mt-8 bg-gray-800 p-8 rounded-lg shadow-lg text-center">
+            <svg class="mx-auto h-16 w-16 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h2 class="text-3xl font-bold mt-4">Grazie!</h2>
+            <p class="text-gray-300 mt-2">La tua prenotazione è stata inviata con successo. Ci vediamo alla festa!</p>
+            <button id="new-booking-btn" class="mt-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition">
+                Fai un'altra prenotazione
+            </button>
+        </section>
+        
+        <!-- Pulsante Admin -->
+        <div class="text-center mt-12">
+            <button id="admin-btn" class="text-sm text-gray-500 hover:text-indigo-400 transition">Accesso Admin</button>
+        </div>
+
+        <!-- Sezione 4: Vista Admin -->
+        <section id="admin-section" class="hidden mt-8 bg-gray-800 p-6 rounded-lg shadow-lg">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                <h2 class="text-2xl font-semibold">Riepilogo Ordini</h2>
+                <button id="download-admin-pdf-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition w-full md:w-auto">
+                    Scarica Riepilogo PDF
+                </button>
+            </div>
+            <!-- Riepilogo totali articoli -->
+            <div id="admin-summary-section" class="mb-8">
+                 <h3 class="text-xl font-semibold mb-3">Totale Articoli Ordinati</h3>
+                 <div id="admin-summary-totals" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 bg-gray-700 p-4 rounded-lg">
+                    <!-- I totali verranno inseriti qui -->
+                 </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-gray-700 rounded-lg">
+                    <thead>
+                        <tr class="bg-gray-600">
+                            <th class="p-3 text-left">Nome</th>
+                            <th class="p-3 text-left">N. Persone</th>
+                            <th class="p-3 text-left">Dettaglio Ordine</th>
+                            <th class="p-3 text-right">Totale</th>
+                            <th class="p-3 text-right">Azioni</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-orders-table">
+                        <!-- Gli ordini verranno inseriti qui da JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <!-- Modal Riepilogo Ordine -->
+    <div id="summary-modal" class="hidden modal-backdrop">
+        <div class="bg-gray-800 w-11/12 max-w-2xl rounded-lg shadow-xl p-6 relative max-h-[90vh] overflow-y-auto">
+            <h2 class="text-2xl font-bold mb-4 text-indigo-400">Riepilogo del tuo Ordine</h2>
+            <div id="summary-content"></div>
+            <p id="summary-error" class="text-red-400 text-sm mt-4 hidden"></p>
+            <div class="flex justify-between items-center mt-6">
+                 <button id="download-pdf-btn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition">
+                    Scarica PDF
+                 </button>
+                 <div class="flex gap-4">
+                    <button id="close-modal-btn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition">Modifica</button>
+                    <button id="submit-order-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition">
+                        <span id="submit-text">Invia Prenotazione</span>
+                        <span id="submit-spinner" class="hidden">
+                            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </span>
+                    </button>
+                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Accesso Admin -->
+    <div id="admin-modal" class="hidden modal-backdrop">
+        <div class="bg-gray-800 w-11/12 max-w-sm rounded-lg shadow-xl p-6 relative">
+            <h2 class="text-xl font-bold mb-4 text-indigo-400">Accesso Area Riservata</h2>
+            <p class="text-gray-400 mb-4">Inserisci la password per visualizzare il riepilogo degli ordini.</p>
+            <div>
+                <label for="adminPassword" class="block text-sm font-medium text-gray-300 mb-1">Password</label>
+                <input type="password" id="adminPassword" class="w-full bg-gray-700 border border-gray-600 rounded-md p-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                <p id="admin-login-error" class="text-red-400 text-sm mt-2 hidden"></p>
+            </div>
+            <div class="flex justify-end gap-4 mt-6">
+                 <button id="close-admin-modal-btn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition">Annulla</button>
+                 <button id="submit-admin-login-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition">Entra</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Conferma Cancellazione -->
+    <div id="delete-confirm-modal" class="hidden modal-backdrop">
+        <div class="bg-gray-800 w-11/12 max-w-sm rounded-lg shadow-xl p-6 relative">
+            <h2 class="text-xl font-bold mb-4 text-red-500">Conferma Cancellazione</h2>
+            <p class="text-gray-300 mb-6">Sei sicuro di voler eliminare questo ordine? L'azione è irreversibile.</p>
+            <div class="flex justify-end gap-4">
+                 <button id="cancel-delete-btn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition">Annulla</button>
+                 <button id="confirm-delete-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition">Elimina</button>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module">
+        // Importa le funzioni di Firebase necessarie
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        
+        const { jsPDF } = window.jspdf;
+
+        // --- CONFIGURAZIONE E STATO DELL'APPLICAZIONE ---
+        const firebaseConfig = typeof __firebase_config !== 'undefined' 
+            ? JSON.parse(__firebase_config) 
+            : { apiKey: "YOUR_API_KEY", authDomain: "YOUR_AUTH_DOMAIN", projectId: "YOUR_PROJECT_ID" };
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'pool-party-app';
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const ordersCollectionPath = `artifacts/${appId}/public/data/poolPartyOrders`;
+        const ordersCollection = collection(db, ordersCollectionPath);
+
+        const menu = {
+            "Menù Cena": [
+                { name: "Focaccia", price: 6.00, description: "Sale, olio e rosmarino" },
+                { name: "Margherita", price: 8.00, description: "Pomodoro, mozzarella, basilico" },
+                { name: "Napoli", price: 8.00, description: "Pomodoro, alici e mozzarella" },
+                { name: "Diavola", price: 10.00, description: "Pomodoro, mozzarella, salame piccante" },
+                { name: "Capricciosa", price: 10.00, description: "Pomodoro, mozzarella, prosciutto, funghi, uova, olive, carciofini" },
+                { name: "Fiori e Alici", price: 10.00, description: "Fiori di zucca, alici e mozzarella" },
+                { name: "Pizza Veggie", price: 10.00, description: "Pomodoro, peperoni, melanzane, zucchine" },
+                { name: "Boscaiola Bianca", price: 10.00, description: "Funghi, salsiccia e mozzarella" },
+                { name: "La Pier", price: 10.00, description: "Crudo, bufala, rucola e pachino" },
+                { name: "Wurstel e Patatine", price: 10.00, description: "Bianca wurstel e patatine fritte" },
+                { name: "Mini Supplì", price: 5.00, description: "Deliziosi supplì al telefono" },
+                { name: "Olive Ascolane", price: 5.00, description: "Olive ripiene impanate e fritte" },
+                { name: "Mozzarelline", price: 5.00, description: "Mozzarelline impanate e fritte" },
+                { name: "Nuggets Pollo", price: 5.00, description: "Bocconcini di pollo impanati" },
+            ]
+        };
+        const pizzaOptions = [{ name: "Senza glutine", price: 2.00 }, { name: "Senza lattosio", price: 1.50 }];
+        const lifeguardFee = 3.00;
+        let currentOrder = { firstName: '', lastName: '', peopleCount: 0, guests: [], total: 0, createdAt: null };
+        let allOrders = [];
+        let itemTotals = {};
+        let orderToDeleteId = null;
+        
+        // --- FUNZIONI PRINCIPALI ---
+        function showMenu() {
+            const formErrorEl = document.getElementById('form-error');
+            formErrorEl.classList.add('hidden'); 
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const peopleCount = parseInt(document.getElementById('peopleCount').value, 10);
+            if (!firstName || !lastName || isNaN(peopleCount) || peopleCount < 1) {
+                formErrorEl.textContent = "Per favore, compila tutti i campi correttamente.";
+                formErrorEl.classList.remove('hidden');
+                return;
+            }
+            currentOrder = { firstName, lastName, peopleCount, guests: Array.from({ length: peopleCount }, () => ({ items: [], total: 0 })), total: 0, createdAt: null };
+            document.getElementById('form-section').classList.add('hidden');
+            const menuSection = document.getElementById('menu-section');
+            const menuContainer = document.getElementById('menu-container');
+            menuContainer.innerHTML = '';
+            for (let i = 0; i < peopleCount; i++) {
+                const personLabel = (i === 0) ? `Persona ${i + 1} (Il tuo ordine)` : `Persona ${i + 1}`;
+                const personDiv = document.createElement('div');
+                personDiv.className = 'bg-gray-800 p-6 rounded-lg shadow-md';
+                const categoryName = Object.keys(menu)[0];
+                personDiv.innerHTML = `<div class="flex justify-between items-center border-b border-gray-700 pb-3 mb-4"><h3 class="text-xl font-semibold text-indigo-400">${personLabel}</h3><div id="person-total-${i}" class="text-lg font-bold">€0.00</div></div><div id="person-order-summary-${i}" class="mb-4 space-y-2"></div><div id="menu-content-person-${i}"><h4 class="text-lg font-semibold mb-3 text-gray-300">${categoryName}</h4><div class="space-y-3">${menu[categoryName].map(item => `<div class="bg-gray-700 p-3 rounded-md flex justify-between items-center"><div><p class="font-medium">${item.name}</p><p class="text-sm text-gray-400">${item.description}</p></div><div class="text-right"><p class="font-semibold">€${item.price.toFixed(2)}</p><button data-person="${i}" data-item-name="${item.name}" data-item-price="${item.price}" data-item-category="${categoryName}" class="add-item-btn mt-1 text-sm bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1 px-3 rounded-md transition">+</button></div></div>`).join('')}</div></div>`;
+                menuContainer.appendChild(personDiv);
+            }
+            menuSection.classList.remove('hidden');
+            updateOrderUI(); // Update UI to show lifeguard fee immediately
+        }
+
+        function addItem(personIndex, itemName, itemPrice, itemCategory) {
+            const guest = currentOrder.guests[personIndex];
+            const isPizza = menu["Menù Cena"].find(i => i.name === itemName && i.description.toLowerCase().includes('pomodoro')); // Heuristic for pizza
+            if (isPizza) {
+                 guest.items.push({ name: itemName, price: itemPrice, quantity: 1, options: [] });
+            } else {
+                const existingItem = guest.items.find(item => item.name === itemName && !item.options);
+                 if (existingItem) existingItem.quantity++;
+                 else guest.items.push({ name: itemName, price: itemPrice, quantity: 1 });
+            }
+            updateOrderUI();
+        }
+        
+        function removeItem(personIndex, itemIndex) {
+            const guest = currentOrder.guests[personIndex];
+            if (guest.items[itemIndex].quantity > 1) guest.items[itemIndex].quantity--;
+            else guest.items.splice(itemIndex, 1);
+            updateOrderUI();
+        }
+        
+        function togglePizzaOption(personIndex, itemIndex, optionName, optionPrice, isChecked) {
+            const item = currentOrder.guests[personIndex].items[itemIndex];
+            if(!item.options) item.options = [];
+            if(isChecked) item.options.push({ name: optionName, price: optionPrice });
+            else {
+                const optionIdx = item.options.findIndex(opt => opt.name === optionName);
+                if(optionIdx > -1) item.options.splice(optionIdx, 1);
+            }
+            updateOrderUI();
+        }
+
+        function updateOrderUI() {
+            let grandTotal = 0;
+            currentOrder.guests.forEach((guest, personIndex) => {
+                const summaryContainer = document.getElementById(`person-order-summary-${personIndex}`);
+                let personTotal = lifeguardFee; // Start with the fixed fee
+                summaryContainer.innerHTML = `<div class="bg-gray-900 p-2 rounded-md flex justify-between items-center text-sm"><span class="font-semibold">Quota Bagnina</span><span class="font-semibold">€${lifeguardFee.toFixed(2)}</span></div>`;
+                
+                guest.items.forEach((item, itemIndex) => {
+                    let itemTotal = item.price * item.quantity + (item.options ? item.options.reduce((sum, opt) => sum + opt.price, 0) : 0);
+                    personTotal += itemTotal;
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'bg-gray-900 p-2 rounded-md flex justify-between items-center text-sm';
+                    let optionsHtml = '';
+                    if (item.options) { // Check if it's a pizza-like item with options
+                        optionsHtml = `<div class="text-xs text-gray-400 mt-1 flex gap-4">${pizzaOptions.map(opt => `<label class="flex items-center"><input type="checkbox" class="pizza-option-cb bg-gray-600" data-person="${personIndex}" data-item="${itemIndex}" data-option-name="${opt.name}" data-option-price="${opt.price}" ${item.options.some(o => o.name === opt.name) ? 'checked' : ''}><span class="ml-1">${opt.name} (+€${opt.price.toFixed(2)})</span></label>`).join('')}</div>`;
+                    }
+                    itemDiv.innerHTML = `<div><span>${item.quantity}x ${item.name}</span>${optionsHtml}</div><div class="flex items-center gap-2"><span class="font-semibold">€${itemTotal.toFixed(2)}</span><button data-person="${personIndex}" data-item="${itemIndex}" class="remove-item-btn text-red-500 hover:text-red-400 font-bold">X</button></div>`;
+                    summaryContainer.appendChild(itemDiv);
+                });
+                guest.total = personTotal;
+                document.getElementById(`person-total-${personIndex}`).textContent = `€${personTotal.toFixed(2)}`;
+                grandTotal += personTotal;
+                const personMenu = document.getElementById(`menu-content-person-${personIndex}`);
+                if (personMenu) {
+                    personMenu.querySelectorAll('.add-item-btn').forEach(btn => {
+                        const { itemName } = btn.dataset;
+                        const isInCart = guest.items.some(i => i.name === itemName);
+                        btn.classList.toggle('item-in-cart', isInCart);
+                        btn.innerHTML = isInCart ? 'Aggiunto ✓' : '+';
+                    });
+                }
+            });
+            currentOrder.total = grandTotal;
+        }
+        
+        function showSummaryModal() {
+            const summaryContent = document.getElementById('summary-content');
+            summaryContent.innerHTML = `<p class="mb-4"><strong>Prenotazione per:</strong> ${currentOrder.firstName} ${currentOrder.lastName}</p><p class="mb-4"><strong>Numero persone:</strong> ${currentOrder.peopleCount}</p><hr class="border-gray-700 my-4">`;
+            currentOrder.guests.forEach((guest, index) => {
+                const personLabel = (index === 0) ? `Persona ${index + 1} (${currentOrder.firstName})` : `Persona ${index + 1}`;
+                let personHtml = `<div class="mb-4"><h4 class="font-semibold text-lg">${personLabel}</h4>`;
+                personHtml += `<ul class="list-disc list-inside text-gray-300">`;
+                personHtml += `<li>1x Quota Bagnina (€${lifeguardFee.toFixed(2)})</li>`
+                if (guest.items.length === 0) {
+                    // No other items
+                } else {
+                    guest.items.forEach(item => {
+                        let itemText = `${item.quantity}x ${item.name}`;
+                        let optionsText = (item.options && item.options.length > 0) ? ` (${item.options.map(o => o.name).join(', ')})` : '';
+                        personHtml += `<li>${itemText}${optionsText}</li>`;
+                    });
+                }
+                personHtml += `</ul>`;
+                personHtml += `<p class="text-right font-bold">Totale Persona: €${guest.total.toFixed(2)}</p></div>`;
+                summaryContent.innerHTML += personHtml;
+            });
+            summaryContent.innerHTML += `<hr class="border-gray-700 my-4"><div class="text-right text-2xl font-bold text-indigo-400">TOTALE ORDINE: €${currentOrder.total.toFixed(2)}</div>`;
+            document.getElementById('summary-modal').classList.remove('hidden');
+        }
+
+        async function submitOrder() {
+            const summaryErrorEl = document.getElementById('summary-error');
+            summaryErrorEl.classList.add('hidden');
+            document.getElementById('submit-text').classList.add('hidden');
+            document.getElementById('submit-spinner').classList.remove('hidden');
+            document.getElementById('submit-order-btn').disabled = true;
+            try {
+                currentOrder.createdAt = new Date().toISOString();
+                await addDoc(ordersCollection, currentOrder);
+                document.getElementById('summary-modal').classList.add('hidden');
+                document.getElementById('menu-section').classList.add('hidden');
+                document.getElementById('confirmation-section').classList.remove('hidden');
+            } catch (error) {
+                console.error("Errore durante il salvataggio dell'ordine: ", error);
+                summaryErrorEl.textContent = "Si è verificato un errore. Riprova.";
+                summaryErrorEl.classList.remove('hidden');
+            } finally {
+                document.getElementById('submit-text').classList.remove('hidden');
+                document.getElementById('submit-spinner').classList.add('hidden');
+                document.getElementById('submit-order-btn').disabled = false;
+            }
+        }
+        
+        function checkAdminLogin() {
+            const passwordInput = document.getElementById('adminPassword');
+            const password = passwordInput.value;
+            const errorEl = document.getElementById('admin-login-error');
+            if (password === "poolparty2025") {
+                errorEl.classList.add('hidden');
+                document.getElementById('admin-modal').classList.add('hidden');
+                passwordInput.value = '';
+                loadAdminData();
+            } else {
+                errorEl.textContent = "Password errata.";
+                errorEl.classList.remove('hidden');
+            }
+        }
+
+        function calculateAndDisplayTotals() {
+            itemTotals = {};
+            let totalLifeguardFeeCount = 0;
+            allOrders.forEach(order => {
+                totalLifeguardFeeCount += order.peopleCount;
+                order.guests.forEach(guest => {
+                    guest.items.forEach(item => {
+                        let key = item.name;
+                        if (item.options && item.options.length > 0) {
+                            const sortedOptions = item.options.map(o => o.name).sort().join(', ');
+                            key += ` (${sortedOptions})`;
+                        }
+                        itemTotals[key] = (itemTotals[key] || 0) + item.quantity;
+                    });
+                });
+            });
+            itemTotals['Quota Bagnina'] = totalLifeguardFeeCount;
+            const totalsContainer = document.getElementById('admin-summary-totals');
+            totalsContainer.innerHTML = '';
+            if (Object.keys(itemTotals).length === 0) {
+                totalsContainer.innerHTML = '<p class="col-span-full text-center text-gray-400">Nessun articolo ordinato.</p>';
+                return;
+            }
+            const sortedItems = Object.entries(itemTotals).sort((a, b) => b[1] - a[1]);
+            sortedItems.forEach(([name, count]) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'bg-gray-800 p-2 rounded-md text-center';
+                itemDiv.innerHTML = `<div class="font-bold text-lg">${count}</div><div class="text-sm text-gray-300">${name}</div>`;
+                totalsContainer.appendChild(itemDiv);
+            });
+        }
+
+        function loadAdminData() {
+            const adminSection = document.getElementById('admin-section');
+            adminSection.classList.remove('hidden');
+            const tableBody = document.getElementById('admin-orders-table');
+            const q = query(ordersCollection);
+            onSnapshot(q, (querySnapshot) => {
+                const docs = querySnapshot.docs.sort((a,b) => new Date(b.data().createdAt) - new Date(a.data().createdAt));
+                allOrders = docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                calculateAndDisplayTotals();
+                tableBody.innerHTML = '';
+                if (docs.length === 0) {
+                    tableBody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-400">Nessun ordine ancora.</td></tr>`;
+                } else {
+                    allOrders.forEach((order) => {
+                        const row = document.createElement('tr');
+                        row.className = 'border-b border-gray-600 hover:bg-gray-800';
+                        let orderDetailsHtml = order.guests.map((guest, i) => {
+                            let guestItems = `<li>1x Quota Bagnina</li>` + guest.items.map(item => {
+                                let optionsStr = item.options && item.options.length > 0 ? ` (${item.options.map(o=>o.name).join(', ')})` : '';
+                                return `<li>${item.quantity}x ${item.name}${optionsStr}</li>`;
+                            }).join('');
+                            return `<div class="font-semibold">P${i+1}:</div><ul class="list-disc list-inside">${guestItems || 'Nessun articolo'}</ul>`;
+                        }).join('<hr class="my-1 border-gray-500">');
+                        row.innerHTML = `<td class="p-3 align-top">${order.firstName} ${order.lastName}</td><td class="p-3 align-top text-center">${order.peopleCount}</td><td class="p-3 align-top text-sm">${orderDetailsHtml}</td><td class="p-3 align-top text-right font-bold">€${order.total.toFixed(2)}</td><td class="p-3 align-top text-right"><button data-order-id="${order.id}" class="delete-order-btn text-red-500 hover:text-red-400 p-2 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button></td>`;
+                        tableBody.appendChild(row);
+                    });
+                }
+            }, (error) => {
+                console.error("Errore nel caricamento dati admin: ", error);
+                tableBody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-red-400">Errore nel caricamento dati.</td></tr>`;
+            });
+        }
+        
+        async function deleteOrder(orderId) {
+            try {
+                await deleteDoc(doc(db, ordersCollectionPath, orderId));
+            } catch (error) {
+                console.error("Errore eliminazione:", error);
+            } finally {
+                orderToDeleteId = null;
+                document.getElementById('delete-confirm-modal').classList.add('hidden');
+            }
+        }
+
+        function resetApp() {
+            currentOrder = { firstName: '', lastName: '', peopleCount: 0, guests: [], total: 0, createdAt: null };
+            document.getElementById('firstName').value = '';
+            document.getElementById('lastName').value = '';
+            document.getElementById('peopleCount').value = '';
+            document.getElementById('confirmation-section').classList.add('hidden');
+            document.getElementById('admin-section').classList.add('hidden');
+            document.getElementById('form-section').classList.remove('hidden');
+        }
+
+        function generatePDF(isSingleOrder) {
+            const doc = new jsPDF();
+            let y = 15;
+            const addOrderToDoc = (order) => {
+                if (y > 250) { doc.addPage(); y = 15; }
+                doc.setFontSize(14);
+                doc.text(`Prenotazione per: ${order.firstName} ${order.lastName}`, 10, y); y += 7;
+                doc.setFontSize(12);
+                doc.text(`Data: ${new Date(order.createdAt).toLocaleString('it-IT')}`, 10, y); y += 7;
+                doc.text(`Numero persone: ${order.peopleCount}`, 10, y); y += 10;
+                order.guests.forEach((guest, index) => {
+                    if (y > 270) { doc.addPage(); y = 15; }
+                    const personLabel = (index === 0 && order.guests.length > 1) ? `Persona ${index + 1} (${order.firstName})` : `Persona ${index + 1}`;
+                    doc.setFontSize(12);
+                    doc.text(personLabel, 15, y); y += 7;
+                    doc.setFontSize(10);
+                    doc.text(`- 1x Quota Bagnina (€${lifeguardFee.toFixed(2)})`, 20, y); y += 5;
+                    if (guest.items.length === 0) {
+                        // no other items
+                    } else {
+                        guest.items.forEach(item => {
+                            if (y > 280) { doc.addPage(); y = 15; }
+                            let itemText = `${item.quantity}x ${item.name}`;
+                            let optionsText = (item.options && item.options.length > 0) ? ` (${item.options.map(o => o.name).join(', ')})` : '';
+                            doc.text(`- ${itemText}${optionsText}`, 20, y); y += 5;
+                        });
+                    }
+                    doc.setFontSize(11);
+                    doc.text(`Totale Persona: €${guest.total.toFixed(2)}`, 200, y, { align: 'right' }); y += 8;
+                });
+                doc.setLineWidth(0.2);
+                doc.line(10, y, 200, y); y += 8;
+                doc.setFontSize(14);
+                doc.text(`TOTALE ORDINE: €${order.total.toFixed(2)}`, 200, y, { align: 'right' }); y += 15;
+            };
+
+            if (isSingleOrder) {
+                doc.setFontSize(20).text("Riepilogo Ordine - Festa in Piscina", 14, y); y += 15;
+                addOrderToDoc(currentOrder);
+                doc.save(`riepilogo_ordine_${currentOrder.lastName}.pdf`);
+            } else {
+                doc.setFontSize(20).text("Riepilogo Generale Ordini", 14, y); y += 15;
+                doc.setFontSize(16).text("Totale Articoli Ordinati", 14, y); y += 10;
+                const tableData = Object.entries(itemTotals).map(([name, count]) => [name, count]);
+                doc.autoTable({
+                    startY: y,
+                    head: [['Articolo', 'Quantità']],
+                    body: tableData,
+                    theme: 'grid',
+                    headStyles: { fillColor: [79, 70, 229] }
+                });
+                y = doc.autoTable.previous.finalY + 15;
+                doc.setFontSize(16).text("Dettaglio Singoli Ordini", 14, y); y += 10;
+                allOrders.forEach(addOrderToDoc);
+                doc.save(`riepilogo_generale_ordini.pdf`);
+            }
+        }
+
+        // --- GESTIONE EVENTI ---
+        document.getElementById('continue-btn').addEventListener('click', showMenu);
+        document.getElementById('confirm-order-btn').addEventListener('click', showSummaryModal);
+        document.getElementById('close-modal-btn').addEventListener('click', () => document.getElementById('summary-modal').classList.add('hidden'));
+        document.getElementById('submit-order-btn').addEventListener('click', submitOrder);
+        document.getElementById('new-booking-btn').addEventListener('click', resetApp);
+        document.getElementById('download-pdf-btn').addEventListener('click', () => generatePDF(true));
+        document.getElementById('download-admin-pdf-btn').addEventListener('click', () => generatePDF(false));
+        document.getElementById('admin-btn').addEventListener('click', () => {
+            document.getElementById('admin-modal').classList.remove('hidden');
+            document.getElementById('adminPassword').focus();
+        });
+        document.getElementById('close-admin-modal-btn').addEventListener('click', () => document.getElementById('admin-modal').classList.add('hidden'));
+        document.getElementById('submit-admin-login-btn').addEventListener('click', checkAdminLogin);
+        document.getElementById('adminPassword').addEventListener('keyup', (e) => { if (e.key === 'Enter') checkAdminLogin(); });
+        document.getElementById('cancel-delete-btn').addEventListener('click', () => {
+            orderToDeleteId = null;
+            document.getElementById('delete-confirm-modal').classList.add('hidden');
+        });
+        document.getElementById('confirm-delete-btn').addEventListener('click', () => {
+            if (orderToDeleteId) deleteOrder(orderToDeleteId);
+        });
+        document.getElementById('admin-orders-table').addEventListener('click', (e) => {
+            const deleteBtn = e.target.closest('.delete-order-btn');
+            if (deleteBtn) {
+                orderToDeleteId = deleteBtn.dataset.orderId;
+                document.getElementById('delete-confirm-modal').classList.remove('hidden');
+            }
+        });
+        document.getElementById('menu-container').addEventListener('click', (e) => {
+            const addBtn = e.target.closest('.add-item-btn');
+            const removeBtn = e.target.closest('.remove-item-btn');
+            const optionCb = e.target.closest('.pizza-option-cb');
+            if (addBtn) {
+                const { person, itemName, itemPrice, itemCategory } = addBtn.dataset;
+                addItem(parseInt(person), itemName, parseFloat(itemPrice), itemCategory);
+            } else if (removeBtn) {
+                const { person, item } = removeBtn.dataset;
+                removeItem(parseInt(person), parseInt(item));
+            } else if (optionCb) {
+                const { person, item, optionName, optionPrice } = optionCb.dataset;
+                togglePizzaOption(parseInt(person), parseInt(item), optionName, parseFloat(optionPrice), optionCb.checked);
+            }
+        });
+
+        // --- GESTIONE AUTENTICAZIONE ---
+        const continueBtn = document.getElementById('continue-btn');
+        async function handleAuthentication() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Authentication failed:", error);
+                continueBtn.textContent = 'Errore di autenticazione';
+                document.getElementById('form-error').textContent = "Impossibile connettersi al servizio. Ricarica la pagina.";
+                document.getElementById('form-error').classList.remove('hidden');
+            }
+        }
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                console.log("Authentication successful. User UID:", user.uid);
+                continueBtn.disabled = false;
+                continueBtn.textContent = 'Continua e Ordina';
+            }
+        });
+        handleAuthentication();
+
+    </script>
+</body>
+</html>
